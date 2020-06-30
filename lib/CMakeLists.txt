@@ -22,8 +22,6 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND lora_sdr_sources
     add_crc_impl.cc
     crc_verif_impl.cc
@@ -52,7 +50,12 @@ if(NOT lora_sdr_sources)
 endif(NOT lora_sdr_sources)
 
 add_library(gnuradio-lora_sdr SHARED ${lora_sdr_sources})
-target_link_libraries(gnuradio-lora_sdr ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES})
+target_link_libraries(gnuradio-lora_sdr gnuradio::gnuradio-runtime gnuradio::gnuradio-blocks gnuradio::gnuradio-filter)
+target_include_directories(gnuradio-lora_sdr
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    PUBLIC $<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>
+    PUBLIC $<INSTALL_INTERFACE:include>
+  )
 set_target_properties(gnuradio-lora_sdr PROPERTIES DEFINE_SYMBOL "gnuradio_lora_sdr_EXPORTS")
 
 if(APPLE)
@@ -72,28 +75,24 @@ GR_LIBRARY_FOO(gnuradio-lora_sdr RUNTIME_COMPONENT "lora_sdr_runtime" DEVEL_COMP
 ########################################################################
 include(GrTest)
 
-include_directories(${CPPUNIT_INCLUDE_DIRS})
+# If your unit tests require special include paths, add them here
+# include_directories()
 
 list(APPEND test_lora_sdr_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/test_lora_sdr.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_lora_sdr.cc
 )
 
-add_executable(test-lora_sdr ${test_lora_sdr_sources})
+# Anything we need to link to for the unit tests go here
+list(APPEND GR_TEST_TARGET_DEPS gnuradio-lora_sdr)
 
-target_link_libraries(
-  test-lora_sdr
-  ${GNURADIO_RUNTIME_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${CPPUNIT_LIBRARIES}
-  gnuradio-lora_sdr
-)
+if(NOT test_foo_sources)
+    MESSAGE(STATUS "No C++ unit tests... skipping")
+    return()
+endif(NOT test_foo_sources)
 
-GR_ADD_TEST(test_lora_sdr test-lora_sdr)
-
-########################################################################
-# Print summary
-########################################################################
-message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "Building for version: ${VERSION} / ${LIBVER}")
-
+foreach(qa_file ${test_lora_sources})
+    GR_ADD_CPP_TEST("lora_${qa_file}"
+        ${CMAKE_CURRENT_SOURCE_DIR}/${qa_file}
+    )
+endforeach(qa_file)

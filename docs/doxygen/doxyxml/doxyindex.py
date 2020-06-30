@@ -22,12 +22,14 @@
 Classes providing more user-friendly interfaces to the doxygen xml
 docs than the generated classes provide.
 """
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import os
 
-from generated import index
-from base import Base
-from text import description
+from .generated import index
+from .base import Base
+from .text import description
 
 class DoxyIndex(Base):
     """
@@ -43,9 +45,9 @@ class DoxyIndex(Base):
         self._root = index.parse(os.path.join(self._xml_path, 'index.xml'))
         for mem in self._root.compound:
             converted = self.convert_mem(mem)
-            # For files and namespaces we want the contents to be
-            # accessible directly from the parent rather than having
-            # to go through the file object.
+            # For files we want the contents to be accessible directly
+            # from the parent rather than having to go through the file
+            # object.
             if self.get_cls(mem) == DoxyFile:
                 if mem.name.endswith('.h'):
                     self._members += converted.members()
@@ -99,12 +101,12 @@ class DoxyCompMem(Base):
             dpis.append(dpi)
         self._data['params'] = dpis
 
-
 class DoxyCompound(DoxyCompMem):
     pass
 
 class DoxyMember(DoxyCompMem):
     pass
+
 
 class DoxyFunction(DoxyMember):
 
@@ -175,7 +177,6 @@ class DoxyParameterItem(DoxyMember):
 
     description = property(lambda self: self.data()['description'])
     name = property(lambda self: self.data()['name'])
-
 
 class DoxyClass(DoxyCompound):
 
@@ -299,3 +300,4 @@ class DoxyOther(Base):
         return obj.kind in cls.kinds
 
 Base.mem_classes.append(DoxyOther)
+
