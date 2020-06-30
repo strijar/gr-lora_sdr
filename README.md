@@ -40,8 +40,8 @@ If you find this implementation useful for your project, please consider citing 
 ## Frequent errors:  
 ‘ImportError: No module named lora_sdr’ under other distribution than Redhat7: -This issue comes probably from erroneous PYTHONPATH and LD_LIBRARY_PATH set in the script setpaths.sh. -The paths might need to be changed to: ~/lora_sdr/lib/python2.7/dist-packages ~/lora_sdr/lib
 ## Requirements:  
-    -Gnuradio 3.7  
-    -python 2  
+    -Gnuradio 3.8  
+    -python 3  
     -cmake  
     -swig  
     -libvolk  
